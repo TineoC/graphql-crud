@@ -1,91 +1,81 @@
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from './page.module.css'
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
+import Image from "next/image"
+import Link from "next/link"
+import { FcInfo } from "react-icons/fc"
 
-const inter = Inter({ subsets: ['latin'] })
+console.log(process.env.GRAFBASE_API_URL)
+async function getLaunches() {
+	const client = new ApolloClient({
+		uri: process.env.GRAFBASE_API_URL,
+		cache: new InMemoryCache(),
+	})
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const { data } = await client.query({
+		query: gql`
+			query ExampleQuery {
+				launchesPast(limit: 20) {
+					id
+					mission_name
+					rocket {
+						rocket_name
+						rocket_type
+					}
+					links {
+						flickr_images
+						wikipedia
+					}
+					details
+					launch_date_local
+				}
+			}
+		`,
+	})
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
+	return data.launchesPast
+}
 
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+export default async function Home() {
+	const launches = await getLaunches()
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
+	return (
+		<main className='grid gap-4 grid-cols-3 grid-rows-3'>
+			{launches.map((launch) => {
+				return (
+					<div
+						key={launch.id}
+						className='bg-indigo-400 rounded-sm text-white p-4 flex flex-col gap-4'
+					>
+						<div className='info'>
+							<h3 className='font-bold'>
+								Mission {launch.mission_name}
+							</h3>
+							<small>{launch.launch_date_local}</small>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+							<p>
+								<span className='font-bold'>Rocket Name</span>{" "}
+								{launch.rocket.rocket_name}
+								<i>
+									<Link
+										href={launch.links.wikipedia || ""}
+										target='_blank'
+									>
+										<FcInfo className='text-xl' />
+									</Link>
+								</i>
+							</p>
+						</div>
+
+						{launch.links.flickr_images[0] ? (
+							<Image
+								width='300'
+								height='300'
+								alt='Rocket'
+								src={launch.links.flickr_images[0]}
+							/>
+						) : null}
+					</div>
+				)
+			})}
+		</main>
+	)
 }
