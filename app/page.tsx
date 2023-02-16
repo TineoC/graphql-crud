@@ -39,7 +39,7 @@ export default async function Home() {
 
 	return (
 		<main className='grid gap-4 grid-cols-3 grid-rows-3'>
-			{launches.map((launch) => {
+			{launches.map((launch: any) => {
 				return (
 					<div
 						key={launch.id}
