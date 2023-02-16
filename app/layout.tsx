@@ -16,7 +16,7 @@ export default function RootLayout({
       */}
 			<head />
 			<body className={inter.className}>
-				<h1 className='text-3xl font-bold'>SpaceX Launches</h1>
+				<h1 className='text-3xl font-bold mb-2'>SpaceX Launches</h1>
 				{children} <footer>Christopher Tineo &copy; 2023</footer>
 			</body>
 		</html>

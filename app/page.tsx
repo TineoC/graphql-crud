@@ -3,7 +3,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { FcInfo } from "react-icons/fc"
 
-console.log(process.env.GRAFBASE_API_URL)
 async function getLaunches() {
 	const client = new ApolloClient({
 		uri: process.env.GRAFBASE_API_URL,
@@ -38,7 +37,7 @@ export default async function Home() {
 	const launches = await getLaunches()
 
 	return (
-		<main className='grid gap-4 grid-cols-3 grid-rows-3'>
+		<main className='grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-3'>
 			{launches.map((launch: any) => {
 				return (
 					<div
@@ -71,6 +70,7 @@ export default async function Home() {
 								height='300'
 								alt='Rocket'
 								src={launch.links.flickr_images[0]}
+								className='w-full h-60 object-cover'
 							/>
 						) : null}
 					</div>
